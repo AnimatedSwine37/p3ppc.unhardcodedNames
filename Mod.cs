@@ -197,6 +197,10 @@ public unsafe class Mod : ModBase // <= Do not Remove.
 
     }
 
+    /// <summary>
+    /// Adds all of the name patches from a directory
+    /// </summary>
+    /// <param name="dir">The directory to search for patches in</param>
     private void AddNamesFromDir(string dir)
     {
         AddNamesFromDir<Name, string?>(dir, _itemNames, "ItemNames.json", WriteGenericName);
@@ -206,6 +210,15 @@ public unsafe class Mod : ModBase // <= Do not Remove.
         AddNamesFromDir<Name, string?>(dir, _glossaryText, "Glossary.json", WriteGenericName);
     }
 
+    /// <summary>
+    /// Tries to add a name patch
+    /// </summary>
+    /// <typeparam name="T1">The expected type of name patch. This should be an <see cref="IName{T2}"/></typeparam>
+    /// <typeparam name="T2">The type of name this is for. This is the generic type of the <see cref="IName{T2}"/></typeparam>
+    /// <param name="dir">The directory the patch should be in</param>
+    /// <param name="namesDict">A list of names that will be added to if there is a patch</param>
+    /// <param name="nameFile">The name of the patch file to search for</param>
+    /// <param name="WriteName">A method for writing the patched names to memory</param>
     private void AddNamesFromDir<T1, T2>(string dir, Dictionary<int, nuint[]> namesDict, string nameFile, Action<object, Dictionary<int, nuint[]>, int, int> WriteName)
         where T1 : IName<T2>
     {
@@ -241,12 +254,26 @@ public unsafe class Mod : ModBase // <= Do not Remove.
         }
     }
 
+    /// <summary>
+    /// Writes a generic name, that is just a string
+    /// </summary>
+    /// <param name="langName">The name of the language this is for</param>
+    /// <param name="namesDict">The dictionary of names to add this to</param>
+    /// <param name="id">The id of the name this is for</param>
+    /// <param name="lang">The id of the language this is for</param>
     private void WriteGenericName(object langName, Dictionary<int, nuint[]> namesDict, int id, int lang)
     {
         var address = WriteString((string)langName, (Language)lang);
         namesDict[id][lang] = address;
     }
 
+    /// <summary>
+    /// Writes the name of a character. This includes their first, last, and full names
+    /// </summary>
+    /// <param name="langName">The name of the language this is for</param>
+    /// <param name="namesDict">The dictionary of names to add this to</param>
+    /// <param name="id">The id of the name this is for</param>
+    /// <param name="lang">The id of the language this is for</param>
     private void WriteCharacterName(object langName, Dictionary<int, nuint[]> namesDict, int id, int lang)
     {
         var name = (NameParts)langName;
@@ -277,6 +304,12 @@ public unsafe class Mod : ModBase // <= Do not Remove.
 
     }
 
+    /// <summary>
+    /// Writes a string to memory
+    /// </summary>
+    /// <param name="text">The string to write to memory</param>
+    /// <param name="language">The language the string is in</param>
+    /// <returns>The address of the string in memory</returns>
     private nuint WriteString(string text, Language language)
     {
         var bytes = _encodings[language].GetBytes(text);
