@@ -53,6 +53,8 @@ public unsafe class Mod : ModBase // <= Do not Remove.
 
     private Memory _memory;
 
+    private const string NAME_PATCH_DIR = "NamePatches";
+
     private IHook<GetNameDelegate> _getItemNameHook;
     private IHook<GetNameDelegate> _getCharacterFullNameHook;
     private IHook<GetNameDelegate> _getCharacterFirstNameHook;
@@ -183,13 +185,27 @@ public unsafe class Mod : ModBase // <= Do not Remove.
         _modLoader.ModLoading += OnModLoading;
 
         foreach (var mod in _modLoader.GetActiveMods().Where(x => x.Generic.ModDependencies.Contains(_modConfig.ModIcon)))
-            AddNamesFromDir(_modLoader.GetDirectoryForModId(mod.Generic.ModId));
+        {
+            AddNamesForMod(mod.Generic.ModId);
+        }
     }
 
     private void OnModLoading(IModV1 mod, IModConfigV1 config)
     {
         if (config.ModDependencies.Contains(_modConfig.ModId))
-            AddNamesFromDir(_modLoader.GetDirectoryForModId(config.ModId));
+        {
+            AddNamesForMod(config.ModId);
+        }
+    }
+
+    /// <summary>
+    /// Adds all of the name patches for a mod
+    /// </summary>
+    /// <param name="modId">The id of the mod to add patches for</param>
+    private void AddNamesForMod(string modId)
+    {
+        string modDir = _modLoader.GetDirectoryForModId(modId);
+        AddNamesFromDir(Path.Combine(modDir, NAME_PATCH_DIR));
     }
 
     private void DumpText()
