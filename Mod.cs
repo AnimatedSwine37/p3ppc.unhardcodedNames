@@ -120,9 +120,11 @@ public unsafe class Mod : ModBase // <= Do not Remove.
             _getCharacterFullNameHook = _hooks.CreateHook<GetNameDelegate>(GetCharacterFullName, (long)funcAddress).Activate();
         });
 
-        Utils.SigScan("0F 88 ?? ?? ?? ?? 41 51 48 89 14 24", "GetCharacterFirstName Ptr", address =>
+        Utils.SigScan("E8 ?? ?? ?? ?? 44 0F B6 4C 24 ?? 41 0F 28 C8", "GetCharacterFirstName Thunk Ptr", address =>
         {
-            var funcAddress = Utils.GetGlobalAddress(address + 2);
+            var thunkAddress = Utils.GetGlobalAddress(address + 1);
+            Utils.LogDebug($"Found GetCharacterFirstName thunk function at 0x{thunkAddress:X}");
+            var funcAddress = Utils.GetGlobalAddress((nint)thunkAddress + 1);
             Utils.LogDebug($"Found GetCharacterFirstName function at 0x{funcAddress:X}");
             _getCharacterFirstNameHook = _hooks.CreateHook<GetNameDelegate>(GetCharacterFirstName, (long)funcAddress).Activate();
         });
